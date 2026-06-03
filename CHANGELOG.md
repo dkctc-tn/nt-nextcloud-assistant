@@ -3,8 +3,84 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 # Change Log
+
 All notable changes to this project will be documented in this file.
 
+## [3.5.0-nt.1] - 2026-06-03
+
+### Fork: NormieTranslator Assistant
+
+This is the first release of the NormieTranslator Assistant fork, based on Nextcloud Assistant 3.5.0-dev.2.
+
+#### Added - Custom Branding
+- **BrandingService**: Complete branding management service
+- Custom app name configuration
+- Custom logo upload and path configuration
+- Custom primary color theming
+- Custom header text
+- White-label mode for complete rebranding
+- Branding API endpoints in ConfigController
+- Admin settings for branding configuration
+
+#### Added - Custom Headers for LLM Requests
+- **CustomHeadersService**: Encrypted header storage and management
+- **CustomHeader**: Entity for storing custom headers
+- **CustomHeaderMapper**: Database mapper for custom headers
+- Database migration for `assistant_custom_headers` table
+- Per-provider custom header configuration
+- Encrypted storage for sensitive header values (API keys, tokens)
+- User-level header management
+- Enable/disable headers without deletion
+- API endpoints for header CRUD operations
+- Custom headers documentation
+
+#### Added - MCP (Model Context Protocol) Integration
+- **MCPConfigService**: MCP provider configuration and management
+- **MCPProviderAdapter**: Base class for MCP provider adapters
+- **ComposioMCPProvider**: Composio For You MCP integration
+- **KlavisAIMCPProvider**: Klavis AI integration
+- **PipedreamMCPProvider**: Pipedream integration
+- **MCPController**: REST API for MCP provider management
+- MCP provider registration in Application.php
+- Encrypted authentication storage per provider
+- Connection testing functionality
+- MCP integration documentation
+
+#### Added - Documentation
+- **README_FORK.md**: Comprehensive fork documentation
+- **FORK_NOTICE.md**: AGPL compliance documentation
+- **docs/custom-headers.md**: Custom headers guide
+- **docs/mcp-integration.md**: MCP integration guide
+- **docs/branding.md**: Branding customization guide
+
+#### Changed
+- Updated `appinfo/info.xml` with NormieTranslator branding
+- Updated `package.json` with fork repository information
+- Extended Application.php with branding and MCP configuration constants
+- Extended ConfigController with branding endpoints
+- Changed APP_ID from 'assistant' to 'nt_assistant'
+- Updated version to 3.5.0-nt.1
+
+#### Technical Details
+- Maintains full compatibility with Nextcloud 33-35
+- All sensitive data encrypted using Nextcloud's ICrypto service
+- Per-user configuration for custom headers and MCP authentication
+- Admin-level controls for branding and MCP provider enablement
+- Comprehensive REST API for all new features
+- Database migrations for new tables
+
+#### Attribution
+- Original Project: Nextcloud Assistant by Nextcloud GmbH
+- Original Author: Julien Veyssier
+- Original Repository: https://github.com/nextcloud/assistant
+- Fork Maintainer: MoreDKon/NormieTranslator
+- Fork Repository: https://github.com/dkctc-tn/nt-nextcloud-assistant
+
+---
+
+## [3.5.0-dev.2] - Original Nextcloud Assistant Changelog
+
+_(Original changelog from Nextcloud Assistant follows below)_
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
