@@ -120,6 +120,12 @@ class Application extends App implements IBootstrap {
 
 		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
 
+		// Register MCP providers conditionally based on configuration
+		// These will be checked at runtime for enabled status
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\ComposioMCPProvider::class);
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\KlavisAIMCPProvider::class);
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\PipedreamMCPProvider::class);
+
 		if (class_exists('OCP\\TaskProcessing\\TaskTypes\\AudioToAudioChat')) {
 			$context->registerTaskProcessingProvider(AudioToAudioChatProvider::class);
 		}
