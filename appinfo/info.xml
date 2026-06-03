@@ -4,21 +4,29 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <info>
-	<id>assistant</id>
-	<name>Nextcloud Assistant</name>
-	<summary>Process and transform text</summary>
+	<id>nt_assistant</id>
+	<name>NormieTranslator Assistant</name>
+	<summary>Enhanced AI assistant with custom branding and MCP integration</summary>
 	<description><![CDATA[
-This app brings a user interface to use the Nextcloud text processing feature.
+This app is a customized fork of Nextcloud Assistant, enhanced for the NormieTranslator system with custom branding, 
+custom LLM request headers, and MCP (Model Context Protocol) integration.
 
+**Original Nextcloud Assistant Features:**
+
+This app brings a user interface to use the Nextcloud text processing feature.
 It allows users to launch AI tasks, be notified when they finish and see the results.
 The assistant also appears in others apps like Text to easily process parts of a document.
 
-More details on the assistant OCS API and frontend integration possibilities in the
-[developer doc](https://github.com/nextcloud/assistant/raw/main/docs/developer)
+### Enhanced Features in NormieTranslator Assistant:
+
+* **Custom Branding**: Full white-label support with customizable app names, logos, and colors
+* **Custom Headers**: Add custom headers to LLM requests for specialized API integration
+* **MCP Integration**: Support for Composio For You MCP, Klavis AI, and Pipedream integrations
+* **NormieTranslator Agents**: Pre-configured access to specialized communication profiles
 
 ### How to use it
 
-A new right header menu entry appears. Once clicked, the assistant is displayed and you can select and task type and
+A new right header menu entry appears. Once clicked, the assistant is displayed and you can select a task type and
 set the input you want to process.
 
 The task might run immediately or be scheduled depending on the time estimation given by the AI provider.
@@ -28,8 +36,6 @@ from which the results can be displayed.
 Other apps can integrate with the assistant. For example, Text will display an inline button besides every paragraph
 to directly select a task type to process this paragraph. Selecting a task this way will open the assistant with the task
 being pre-selected and the input text set.
-
-More details and screenshots in the [user doc](https://github.com/nextcloud/assistant/raw/main/docs/user).
 
 ## Features
 
@@ -61,18 +67,25 @@ Known providers:
 * [Local Whisper Speech-To-Text](https://apps.nextcloud.com/apps/stt_whisper)
 
 More details on how to set this up in the [admin docs](https://docs.nextcloud.com/server/latest/admin_manual/ai/index.html)
+
+---
+
+**Forked from**: [Nextcloud Assistant](https://github.com/nextcloud/assistant) by Nextcloud GmbH  
+**Original Author**: Julien Veyssier  
+**Fork Maintainer**: MoreDKon/NormieTranslator  
+**Source Code**: https://github.com/dkctc-tn/nt-nextcloud-assistant
 ]]>	</description>
-	<version>3.5.0-dev.2</version>
+	<version>3.5.0-nt.1</version>
 	<licence>agpl</licence>
-	<author>Julien Veyssier</author>
+	<author>MoreDKon (fork of Nextcloud Assistant by Julien Veyssier)</author>
 	<namespace>Assistant</namespace>
 	<documentation>
-		<developer>https://github.com/nextcloud/assistant</developer>
+		<developer>https://github.com/dkctc-tn/nt-nextcloud-assistant</developer>
 	</documentation>
 	<category>integration</category>
 	<category>ai</category>
-	<website>https://github.com/nextcloud/assistant</website>
-	<bugs>https://github.com/nextcloud/assistant/issues</bugs>
+	<website>https://github.com/dkctc-tn/nt-nextcloud-assistant</website>
+	<bugs>https://github.com/dkctc-tn/nt-nextcloud-assistant/issues</bugs>
 	<screenshot>https://github.com/nextcloud/assistant/raw/main/img/screenshots/screenshot1.png</screenshot>
 	<screenshot>https://github.com/nextcloud/assistant/raw/main/img/screenshots/screenshot2.png</screenshot>
 	<screenshot>https://github.com/nextcloud/assistant/raw/main/img/screenshots/screenshot3.png</screenshot>

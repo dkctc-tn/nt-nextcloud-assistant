@@ -51,9 +51,27 @@ use OCP\TaskProcessing\IManager;
 
 class Application extends App implements IBootstrap {
 
-	public const APP_ID = 'assistant';
+	public const APP_ID = 'nt_assistant';
 
 	public const ASSISTANT_DATA_FOLDER_NAME = 'Assistant';
+
+	// Custom branding configuration keys
+	public const BRANDING_APP_NAME = 'branding_app_name';
+	public const BRANDING_APP_LOGO = 'branding_app_logo';
+	public const BRANDING_APP_COLOR = 'branding_app_color';
+	public const BRANDING_HEADER_TEXT = 'branding_header_text';
+	public const BRANDING_WHITE_LABEL_MODE = 'branding_white_label_mode';
+
+	// Custom headers configuration
+	public const CUSTOM_HEADERS_ENABLED = 'custom_headers_enabled';
+
+	// MCP configuration keys
+	public const MCP_COMPOSIO_ENABLED = 'mcp_composio_enabled';
+	public const MCP_COMPOSIO_ENDPOINT = 'mcp_composio_endpoint';
+	public const MCP_KLAVIS_ENABLED = 'mcp_klavis_enabled';
+	public const MCP_KLAVIS_ENDPOINT = 'mcp_klavis_endpoint';
+	public const MCP_PIPEDREAM_ENABLED = 'mcp_pipedream_enabled';
+	public const MCP_PIPEDREAM_ENDPOINT = 'mcp_pipedream_endpoint';
 
 	public const CHAT_USER_INSTRUCTIONS = 'This is a conversation in a specific language between the user and you, Nextcloud Assistant. You are a kind, polite and helpful AI that helps the user to the best of its abilities. If you do not understand something, you will ask for clarification. Detect the language that the user is using. Make sure to use the same language in your response. Do not mention the language explicitly. Format your answers properly in markdown.';
 	public const CHAT_USER_INSTRUCTIONS_TITLE = 'This is a conversation between the user and Nextcloud Assistant. Generate a suitable title for the conversation that summarizes it. Detect the language of the conversation. The title that you output should be in the same language as the conversation. Output only the title in plain text, nothing else. Do not mention the language explicitly. For example, if the conversation is about trees in sweden but is written in Spanish, the title could be "Àrboles en Suecia", if it was in English, the title could be "Trees in Sweden". Do not write the title in e.g. Swedish just because Sweden is mentioned in the conversation.';
@@ -101,6 +119,12 @@ class Application extends App implements IBootstrap {
 		$context->registerNotifierService(Notifier::class);
 
 		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
+
+		// Register MCP providers conditionally based on configuration
+		// These will be checked at runtime for enabled status
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\ComposioMCPProvider::class);
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\KlavisAIMCPProvider::class);
+		$context->registerTaskProcessingProvider(\OCA\Assistant\TaskProcessing\PipedreamMCPProvider::class);
 
 		if (class_exists('OCP\\TaskProcessing\\TaskTypes\\AudioToAudioChat')) {
 			$context->registerTaskProcessingProvider(AudioToAudioChatProvider::class);

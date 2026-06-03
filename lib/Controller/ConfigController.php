@@ -8,6 +8,7 @@
 namespace OCA\Assistant\Controller;
 
 use OCA\Assistant\AppInfo\Application;
+use OCA\Assistant\Service\BrandingService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\OpenAPI;
@@ -26,6 +27,7 @@ class ConfigController extends Controller {
 		IRequest $request,
 		private IConfig $config,
 		private IAppConfig $appConfig,
+		private BrandingService $brandingService,
 		private ?string $userId,
 	) {
 		parent::__construct($appName, $request);
@@ -72,5 +74,60 @@ class ConfigController extends Controller {
 			}
 		}
 		return new DataResponse(1);
+	}
+
+	/**
+	 * Get all branding configuration
+	 *
+	 * @return DataResponse
+	 */
+	#[NoAdminRequired]
+	public function getBranding(): DataResponse {
+		return new DataResponse($this->brandingService->getAllBranding());
+	}
+
+	/**
+	 * Set branding configuration (admin only)
+	 *
+	 * @param string|null $appName Custom app name
+	 * @param string|null $appLogo Custom app logo path
+	 * @param string|null $appColor Custom app color
+	 * @param string|null $headerText Custom header text
+	 * @param bool|null $whiteLabelMode White label mode
+	 * @return DataResponse
+	 */
+	public function setBranding(
+		?string $appName = null,
+		?string $appLogo = null,
+		?string $appColor = null,
+		?string $headerText = null,
+		?bool $whiteLabelMode = null
+	): DataResponse {
+		if ($appName !== null) {
+			$this->brandingService->setAppName($appName);
+		}
+		if ($appLogo !== null) {
+			$this->brandingService->setAppLogo($appLogo);
+		}
+		if ($appColor !== null) {
+			$this->brandingService->setAppColor($appColor);
+		}
+		if ($headerText !== null) {
+			$this->brandingService->setHeaderText($headerText);
+		}
+		if ($whiteLabelMode !== null) {
+			$this->brandingService->setWhiteLabelMode($whiteLabelMode);
+		}
+		return new DataResponse(['success' => true]);
+	}
+
+	/**
+	 * Reset branding to defaults (admin only)
+	 *
+	 * @return DataResponse
+	 */
+	public function resetBranding(): DataResponse {
+		$this->brandingService->resetBranding();
+		return new DataResponse(['success' => true]);
 	}
 }

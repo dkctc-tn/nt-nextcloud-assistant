@@ -1,4 +1,5 @@
 <!--
+  - SPDX-FileCopyrightText: 2026 DK Consultants & Technologies Corp and MoreDKon contributors
   - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
@@ -6,7 +7,7 @@
 	<div id="assistant_prefs" class="section">
 		<h2>
 			<AssistantIcon />
-			{{ t('assistant', 'Nextcloud Assistant') }}
+			{{ t('assistant', 'NormieTranslator Assistant') }}
 		</h2>
 		<div id="assistant-content">
 			<NcFormGroup :label="t('assistant', 'Select which features you want to enable')"
@@ -72,12 +73,22 @@
 					</NcFormBoxButton>
 				</NcFormBox>
 			</div>
+
+			<!-- MCP Tool Selection -->
+			<div v-if="mcpToolsAvailable" class="mcp-tools-section">
+				<h3>{{ t('assistant', 'MCP Tools') }}</h3>
+				<p>{{ t('assistant', 'Select which MCP tools you want to use with the Assistant:') }}</p>
+				<MCPToolSelector v-model="selectedMCPTools"
+					:auto-expand="false"
+					@change="onMCPToolsChange" />
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
 import AssistantIcon from './icons/AssistantIcon.vue'
+import MCPToolSelector from './MCPToolSelector.vue'
 
 import NcFormGroup from '@nextcloud/vue/components/NcFormGroup'
 import NcFormBox from '@nextcloud/vue/components/NcFormBox'
@@ -97,6 +108,7 @@ export default {
 
 	components: {
 		AssistantIcon,
+		MCPToolSelector,
 		NcFormGroup,
 		NcFormBox,
 		NcFormBoxSwitch,
@@ -112,6 +124,8 @@ export default {
 			state: loadState('assistant', 'config'),
 			providers: loadState('assistant', 'availableProviders'),
 			rememberedConversations: loadState('assistant', 'rememberedSessions'),
+			selectedMCPTools: [],
+			mcpToolsAvailable: false,
 		}
 	},
 
@@ -127,9 +141,43 @@ export default {
 	},
 
 	mounted() {
+		this.loadMCPToolsAvailability()
+		this.loadSelectedMCPTools()
 	},
 
 	methods: {
+		async loadMCPToolsAvailability() {
+			try {
+				const response = await axios.get(generateUrl('/apps/assistant/mcp/providers'), {
+					params: { enabled_only: true }
+				})
+				this.mcpToolsAvailable = response.data.length > 0
+			} catch (error) {
+				console.error('Failed to check MCP tools availability:', error)
+			}
+		},
+
+		async loadSelectedMCPTools() {
+			try {
+				const response = await axios.get(generateUrl('/apps/assistant/user/mcp-tools'))
+				this.selectedMCPTools = response.data.tool_ids || []
+			} catch (error) {
+				console.error('Failed to load selected MCP tools:', error)
+			}
+		},
+
+		async onMCPToolsChange(tools) {
+			try {
+				await axios.put(generateUrl('/apps/assistant/user/mcp-tools'), {
+					tool_ids: this.selectedMCPTools
+				})
+				showSuccess(t('assistant', 'MCP tools selection saved'))
+			} catch (error) {
+				console.error('Failed to save MCP tools selection:', error)
+				showError(t('assistant', 'Failed to save MCP tools selection'))
+			}
+		},
+
 		onCheckboxChanged(newValue, key) {
 			this.state[key] = newValue
 			this.saveOptions({ [key]: this.state[key] ? '1' : '0' })
@@ -179,6 +227,21 @@ export default {
 
 	.switch-group {
 		max-width: 800px;
+	}
+
+	.mcp-tools-section {
+		margin-top: 30px;
+		padding-top: 20px;
+		border-top: 1px solid var(--color-border);
+
+		h3 {
+			margin-bottom: 10px;
+		}
+
+		p {
+			color: var(--color-text-maxcontrast);
+			margin-bottom: 15px;
+		}
 	}
 
 	.checkbox-text {

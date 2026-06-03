@@ -1,4 +1,5 @@
 <!--
+  - SPDX-FileCopyrightText: 2026 DK Consultants & Technologies Corp and MoreDKon contributors
   - SPDX-FileCopyrightText: 2023 Nextcloud GmbH and Nextcloud contributors
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
@@ -6,7 +7,7 @@
 	<div id="assistant_prefs" class="section">
 		<h2>
 			<AssistantIcon class="icon" />
-			{{ t('assistant', 'Nextcloud Assistant') }}
+			{{ t('assistant', 'NormieTranslator Assistant') }}
 		</h2>
 		<NcNoteCard type="info">
 			{{ t('assistant', 'Find more details on how to set up Assistant and recommended backends in the Administration documentation.') }}
@@ -118,6 +119,22 @@
 					</div>
 				</NcNoteCard>
 			</div>
+			<!-- NormieTranslator Customizations -->
+			<div class="nt-customizations">
+				<h3>
+					{{ t('assistant', 'NormieTranslator Customizations') }}
+				</h3>
+				
+				<!-- Branding Settings -->
+				<BrandingSettings />
+				
+				<!-- Custom Headers Settings -->
+				<CustomHeadersSettings />
+				
+				<!-- MCP Provider Settings -->
+				<MCPProviderSettings />
+			</div>
+
 			<div class="chat-with-ai">
 				<h4>
 					{{ t('assistant', 'Chat with AI') }}
@@ -186,6 +203,9 @@
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue'
 
 import AssistantIcon from './icons/AssistantIcon.vue'
+import BrandingSettings from './BrandingSettings.vue'
+import CustomHeadersSettings from './CustomHeadersSettings.vue'
+import MCPProviderSettings from './MCPProviderSettings.vue'
 
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 import NcRichContenteditable from '@nextcloud/vue/components/NcRichContenteditable'
@@ -206,6 +226,9 @@ export default {
 
 	components: {
 		AssistantIcon,
+		BrandingSettings,
+		CustomHeadersSettings,
+		MCPProviderSettings,
 		NcNoteCard,
 		NcRichContenteditable,
 		NcTextField,
@@ -315,6 +338,19 @@ export default {
 	.notecard,
 	.text-field {
 		max-width: 900px;
+	}
+
+	.nt-customizations {
+		margin-top: 30px;
+		margin-bottom: 30px;
+		padding: 20px;
+		background: var(--color-background-dark);
+		border-radius: var(--border-radius-large);
+
+		h3 {
+			margin-top: 0;
+			margin-bottom: 20px;
+		}
 	}
 
 	.chat-with-ai {
