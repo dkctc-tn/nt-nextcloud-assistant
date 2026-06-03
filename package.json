@@ -1,7 +1,7 @@
 {
-  "name": "assistant",
-  "version": "3.4.1",
-  "description": "Nextcloud Assistant",
+  "name": "nt-assistant",
+  "version": "3.5.0-nt.1",
+  "description": "NormieTranslator Assistant - Enhanced Nextcloud Assistant with custom branding and MCP integration",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -18,18 +18,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nextcloud/assistant"
+    "url": "https://github.com/dkctc-tn/nt-nextcloud-assistant"
   },
   "keywords": [
     "artificial intelligence",
-    "text processing"
+    "text processing",
+    "normietranslator",
+    "mcp",
+    "custom branding"
   ],
-  "author": "Julien Veyssier",
+  "author": "MoreDKon (fork of Nextcloud Assistant by Julien Veyssier)",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/nextcloud/assistant/issues"
+    "url": "https://github.com/dkctc-tn/nt-nextcloud-assistant/issues"
   },
-  "homepage": "https://github.com/nextcloud/assistant",
+  "homepage": "https://github.com/dkctc-tn/nt-nextcloud-assistant",
   "browserslist": [
     "extends @nextcloud/browserslist-config"
   ],
