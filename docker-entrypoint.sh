@@ -1,15 +1,6 @@
 #!/bin/bash
 set -e
 
-# Start the official Nextcloud bootstrap/Apache flow in the background.
-echo "⏳ Starting Nextcloud entrypoint..."
-/entrypoint.sh apache2-foreground &
-NEXTCLOUD_PID=$!
-
-# Give Nextcloud time to initialize before OCC commands run.
-echo "⏳ Waiting for Nextcloud initialization..."
-sleep 30
-
 is_nextcloud_installed() {
 	# When Nextcloud is not installed, occ prints a warning and may exit non-zero.
 	# We treat any failure or missing JSON as "not installed".
@@ -96,6 +87,7 @@ post_install_tasks() {
 
 post_install_tasks &
 
-# Keep the container attached to the Nextcloud process lifecycle.
-echo "⏳ Handing control back to Nextcloud process..."
-wait "$NEXTCLOUD_PID"
+# Execute the official Nextcloud entrypoint in the foreground to preserve stdin/stdout and signal handling.
+# The Dockerfile CMD ["apache2-foreground"] provides the arguments ("$@").
+echo "⏳ Handing control back to Nextcloud official entrypoint..."
+exec /entrypoint.sh "$@"
