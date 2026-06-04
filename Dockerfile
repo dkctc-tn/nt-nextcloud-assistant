@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG NEXTCLOUD_IMAGE=nextcloud:34-apache
+ARG NEXTCLOUD_IMAGE=nextcloud:33-apache
 
 # Base PHP/Nextcloud stage shared by builder + runtime.
 FROM ${NEXTCLOUD_IMAGE} AS nc_base
