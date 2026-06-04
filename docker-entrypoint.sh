@@ -44,6 +44,27 @@ add_domain_if_missing() {
 	echo "✅ Added $domain at index $index"
 }
 
+configure_reverse_proxy() {
+	# Railway acts as a reverse proxy with HTTPS termination.
+	# Configure Nextcloud to handle this correctly to prevent 500 errors.
+	if [ -f /var/www/html/config/config.php ]; then
+		echo "🔧 Configuring reverse proxy settings..."
+		
+		# Set overwriteprotocol to https (Railway terminates TLS)
+		run_occ config:system:set overwriteprotocol --value="https"
+		
+		# Set overwrite.cli.url for Railway domain
+		if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
+			run_occ config:system:set overwrite.cli.url --value="https://$RAILWAY_PUBLIC_DOMAIN"
+		fi
+		
+		# Trust Railway's proxy network (Railway uses 100.64.0.0/10 for internal networking)
+		run_occ config:system:set trusted_proxies 0 --value="100.64.0.0/10"
+		
+		echo "✅ Reverse proxy configuration complete"
+	fi
+}
+
 post_install_tasks() {
 	# During first-time setup, Nextcloud isn't installed yet and occ can't modify config.
 	# Wait until installation completes, then apply trusted-domain sync + app enable once.
@@ -53,6 +74,10 @@ post_install_tasks() {
 	while [ "$attempt" -lt "$max_attempts" ]; do
 		if is_nextcloud_installed; then
 			echo "✅ Nextcloud is installed; running post-install tasks..."
+			
+			# Configure reverse proxy settings FIRST
+			configure_reverse_proxy
+			
 			if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
 				echo "🚂 Railway public domain detected: $RAILWAY_PUBLIC_DOMAIN"
 				add_domain_if_missing "$RAILWAY_PUBLIC_DOMAIN"
