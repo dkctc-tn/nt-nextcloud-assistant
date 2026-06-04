@@ -4,7 +4,7 @@ This document describes how to deploy `nt-nextcloud-assistant` to Railway using 
 
 ## Deployment Architecture
 
-- The image is based on `nextcloud:30-apache`.
+- The image is based on `nextcloud:33-apache`.
 - The app source is built during image build:
 	- `composer install --no-dev --optimize-autoloader --no-interaction`
 	- `npm ci --prefer-offline --no-audit`
