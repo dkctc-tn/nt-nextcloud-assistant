@@ -2,6 +2,18 @@
 
 This document describes how to deploy `nt-nextcloud-assistant` to Railway using Docker, and it also applies to other Docker-capable platforms.
 
+## DK QUICK NOTES:
+
+#--build and push image to ghcr for Railway deployment:
+#---make sure docker is running first
+#---do the login thing once
+#echo "<your_personal_access_token>" | docker login ghcr.io -u "<your_github_username>" --password-stdin 
+#---then build and push the image as needed, changing the tag between test and prod etc:
+
+docker build -t ghcr.io/dkctc-tn/nt-nextcloud-assistant:test . 
+docker push ghcr.io/dkctc-tn/nt-nextcloud-assistant:test  
+
+
 ## Deployment Architecture
 
 - The image is based on `nextcloud:33-apache`.
