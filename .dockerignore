@@ -1,0 +1,41 @@
+# Version control metadata
+.git
+.github
+.gitignore
+.gitattributes
+
+# Documentation not needed in runtime image
+README.md
+README_FORK.md
+CHANGELOG.md
+CONTRIBUTING.md
+docs/
+
+# Local/development dependency caches
+node_modules/
+vendor/
+.npm/
+.cache/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Test-only files
+tests/
+.phpunit.result.cache
+
+# Build artifacts rebuilt during Docker build
+js/
+css/
+
+# Logs
+*.log
+npm-debug.log*
