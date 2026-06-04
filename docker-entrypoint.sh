@@ -88,6 +88,11 @@ post_install_tasks() {
 post_install_tasks &
 
 # Execute the official Nextcloud entrypoint in the foreground to preserve stdin/stdout and signal handling.
-# The Dockerfile CMD ["apache2-foreground"] provides the arguments ("$@").
+# If no arguments are provided (Railway sometimes starts containers this way), default to apache2-foreground.
 echo "⏳ Handing control back to Nextcloud official entrypoint..."
-exec /entrypoint.sh "$@"
+if [ $# -eq 0 ]; then
+	echo "⚠️ No CMD arguments detected, defaulting to apache2-foreground"
+	exec /entrypoint.sh apache2-foreground
+else
+	exec /entrypoint.sh "$@"
+fi
