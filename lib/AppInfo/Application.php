@@ -29,6 +29,7 @@ use OCA\Assistant\Reference\SpeechToTextReferenceProvider;
 use OCA\Assistant\Reference\TaskOutputFileReferenceProvider;
 use OCA\Assistant\Reference\Text2ImageReferenceProvider;
 use OCA\Assistant\Reference\Text2StickerProvider;
+use OCA\Assistant\Settings\AdminSystem;
 use OCA\Assistant\TaskProcessing\AudioToAudioChatProvider;
 use OCA\Assistant\TaskProcessing\ContextAgentAudioInteractionProvider;
 use OCA\Assistant\TaskProcessing\ImageToTextTranslateProvider;
@@ -117,6 +118,7 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(TaskFailedEvent::class, NewFileMenuTaskFailedListener::class);
 
 		$context->registerNotifierService(Notifier::class);
+		$context->registerAdminSettings(AdminSystem::class);
 
 		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
 

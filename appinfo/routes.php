@@ -14,6 +14,10 @@ return [
 		['name' => 'config#getConfigValue', 'url' => '/config', 'verb' => 'GET'],
 		['name' => 'config#setConfig', 'url' => '/config', 'verb' => 'PUT'],
 		['name' => 'config#setAdminConfig', 'url' => '/admin-config', 'verb' => 'PUT'],
+		['name' => 'config#getTrustedDomains', 'url' => '/api/config/trusted-domains', 'verb' => 'GET'],
+		['name' => 'config#addTrustedDomain', 'url' => '/api/config/trusted-domains', 'verb' => 'POST'],
+		['name' => 'config#removeTrustedDomain', 'url' => '/api/config/trusted-domains/{index}', 'verb' => 'DELETE'],
+		['name' => 'config#autoAddCurrentTrustedDomain', 'url' => '/api/config/trusted-domains/auto-add-current', 'verb' => 'POST'],
 
 		['name' => 'assistant#getAssistantTaskResultPage', 'url' => '/task/view/{taskId}', 'verb' => 'GET'],
 		['name' => 'assistant#getAssistantStandalonePage', 'url' => '/', 'verb' => 'GET'],

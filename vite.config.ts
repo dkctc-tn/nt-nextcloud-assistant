@@ -12,6 +12,7 @@ export default createAppConfig({
 	main: 'src/main.js',
 	personalSettings: 'src/personalSettings.js',
 	adminSettings: 'src/adminSettings.js',
+	adminSystem: 'src/main-admin-system.js',
 	imageGenerationReference: 'src/imageGenerationReference.js',
 	stickerGeneration: 'src/stickerGeneration.js',
 	textGenerationReference: 'src/textGenerationReference.js',
