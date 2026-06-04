@@ -63,6 +63,9 @@ RUN chown -R www-data:www-data \
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
+# output sobo80.txt if present
+RUN if [ -f /sobo80.txt ]; then cat /sobo80.txt; fi
+
 EXPOSE 80
 
 # Run custom wrapper, which delegates to official Nextcloud entrypoint.
