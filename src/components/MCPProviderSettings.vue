@@ -21,7 +21,9 @@
 				<div class="provider-header">
 					<div class="provider-info">
 						<h4>{{ provider.name }}</h4>
-						<p class="provider-description">{{ provider.description }}</p>
+						<p class="provider-description">
+							{{ provider.description }}
+						</p>
 					</div>
 					<div class="provider-toggle">
 						<NcCheckboxRadioSwitch :checked.sync="provider.enabled"
@@ -84,7 +86,9 @@
 							</NcButton>
 							<div v-else class="oauth-status">
 								<CheckCircleIcon :size="20" class="success-icon" />
-								<span>{{ t('assistant', 'Connected') }}</span>
+								<span>
+									{{ t('assistant', 'Connected') }}
+								</span>
 								<NcButton type="tertiary"
 									@click="disconnectOAuth(provider)">
 									{{ t('assistant', 'Disconnect') }}
@@ -121,7 +125,7 @@
 							<div v-for="tool in provider.tools"
 								:key="tool.id"
 								class="tool-item">
-								<ToolIcon :size="16" />
+								<ToolboxIcon :size="16" />
 								<span class="tool-name">{{ tool.name }}</span>
 								<span class="tool-description">{{ tool.description }}</span>
 							</div>
@@ -183,13 +187,13 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import NcTextArea from '@nextcloud/vue/dist/Components/NcTextArea.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcDialog from '@nextcloud/vue/dist/Components/NcDialog.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcSelect from '@nextcloud/vue/components/NcSelect'
+import NcTextField from '@nextcloud/vue/components/NcTextField'
+import NcTextArea from '@nextcloud/vue/components/NcTextArea'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcDialog from '@nextcloud/vue/components/NcDialog'
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
 import LinkIcon from 'vue-material-design-icons/Link.vue'
@@ -197,7 +201,7 @@ import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue'
 import CheckNetworkIcon from 'vue-material-design-icons/CheckNetwork.vue'
 import RefreshIcon from 'vue-material-design-icons/Refresh.vue'
 import LoadingIcon from 'vue-material-design-icons/Loading.vue'
-import ToolIcon from 'vue-material-design-icons/Tool.vue'
+import ToolboxIcon from 'vue-material-design-icons/Toolbox.vue'
 import EyeIcon from 'vue-material-design-icons/Eye.vue'
 import EyeOffIcon from 'vue-material-design-icons/EyeOff.vue'
 
@@ -222,7 +226,7 @@ export default {
 		CheckNetworkIcon,
 		RefreshIcon,
 		LoadingIcon,
-		ToolIcon,
+		ToolboxIcon,
 		EyeIcon,
 		EyeOffIcon,
 	},
@@ -265,12 +269,12 @@ export default {
 			try {
 				await axios.put(
 					generateUrl('/apps/assistant/mcp/providers/{id}', { id: provider.id }),
-					{ enabled: provider.enabled }
+					{ enabled: provider.enabled },
 				)
 				showSuccess(
 					provider.enabled
 						? t('assistant', 'Provider enabled')
-						: t('assistant', 'Provider disabled')
+						: t('assistant', 'Provider disabled'),
 				)
 			} catch (error) {
 				console.error('Failed to toggle provider:', error)
@@ -284,7 +288,7 @@ export default {
 			try {
 				await axios.put(
 					generateUrl('/apps/assistant/mcp/providers/{id}', { id: provider.id }),
-					provider
+					provider,
 				)
 			} catch (error) {
 				console.error('Failed to update provider:', error)
@@ -300,7 +304,7 @@ export default {
 			this.$set(this.testingProvider, provider.id, true)
 			try {
 				const response = await axios.post(
-					generateUrl('/apps/assistant/mcp/providers/{id}/test', { id: provider.id })
+					generateUrl('/apps/assistant/mcp/providers/{id}/test', { id: provider.id }),
 				)
 
 				if (response.data.success) {
@@ -319,7 +323,7 @@ export default {
 		async refreshCapabilities(provider) {
 			try {
 				const response = await axios.post(
-					generateUrl('/apps/assistant/mcp/providers/{id}/capabilities', { id: provider.id })
+					generateUrl('/apps/assistant/mcp/providers/{id}/capabilities', { id: provider.id }),
 				)
 				provider.tools = response.data.tools
 				showSuccess(t('assistant', 'Capabilities refreshed'))
@@ -332,7 +336,7 @@ export default {
 		async connectOAuth(provider) {
 			try {
 				const response = await axios.get(
-					generateUrl('/apps/assistant/mcp/providers/{id}/oauth', { id: provider.id })
+					generateUrl('/apps/assistant/mcp/providers/{id}/oauth', { id: provider.id }),
 				)
 				// Open OAuth flow in new window
 				window.open(response.data.auth_url, '_blank', 'width=600,height=700')
@@ -347,7 +351,7 @@ export default {
 		async disconnectOAuth(provider) {
 			try {
 				await axios.delete(
-					generateUrl('/apps/assistant/mcp/providers/{id}/oauth', { id: provider.id })
+					generateUrl('/apps/assistant/mcp/providers/{id}/oauth', { id: provider.id }),
 				)
 				provider.oauth_connected = false
 				showSuccess(t('assistant', 'OAuth disconnected'))
@@ -361,7 +365,7 @@ export default {
 			const pollInterval = setInterval(async () => {
 				try {
 					const response = await axios.get(
-						generateUrl('/apps/assistant/mcp/providers/{id}/oauth/status', { id: provider.id })
+						generateUrl('/apps/assistant/mcp/providers/{id}/oauth/status', { id: provider.id }),
 					)
 					if (response.data.connected) {
 						provider.oauth_connected = true
@@ -395,7 +399,7 @@ export default {
 			try {
 				await axios.post(
 					generateUrl('/apps/assistant/mcp/providers'),
-					this.newProvider
+					this.newProvider,
 				)
 				showSuccess(t('assistant', 'Custom provider added'))
 				this.closeAddProviderDialog()

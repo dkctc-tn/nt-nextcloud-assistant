@@ -11,7 +11,6 @@
 		<NcNoteCard type="info">
 			{{ t('assistant', 'Customize the appearance and branding of the NormieTranslator Assistant interface.') }}
 		</NcNoteCard>
-		
 		<div class="branding-form">
 			<!-- App Name -->
 			<div class="branding-field">
@@ -113,11 +112,11 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import NcTextArea from '@nextcloud/vue/dist/Components/NcTextArea.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcTextField from '@nextcloud/vue/components/NcTextField'
+import NcTextArea from '@nextcloud/vue/components/NcTextArea'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 
 import UploadIcon from 'vue-material-design-icons/Upload.vue'
 import DeleteIcon from 'vue-material-design-icons/Delete.vue'
@@ -181,7 +180,6 @@ export default {
 					await axios.post(generateUrl('/apps/assistant/branding'), this.branding)
 					this.saveStatus = 'success'
 					showSuccess(t('assistant', 'Branding settings saved'))
-					
 					// Clear success message after 3 seconds
 					setTimeout(() => {
 						this.saveStatus = null
@@ -234,7 +232,7 @@ export default {
 						headers: {
 							'Content-Type': 'multipart/form-data',
 						},
-					}
+					},
 				)
 
 				this.branding.app_logo = response.data.url

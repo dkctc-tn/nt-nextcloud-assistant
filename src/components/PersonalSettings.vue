@@ -51,7 +51,9 @@
 			</NcNoteCard>
 			<div v-else>
 				<h3>{{ t('assistant', 'Configured backends') }}</h3>
-				<p>{{ t('assistant', 'The following services are used as backends for Nextcloud Assistant:') }}</p>
+				<p>
+					{{ t('assistant', 'The following services are used as backends for Nextcloud Assistant:') }}
+				</p>
 				<div v-for="(taskNames, providerName) in providers" :key="providerName">
 					<h5>
 						{{ providerName }}
@@ -61,7 +63,9 @@
 			</div>
 			<div v-if="rememberedConversations.length > 0">
 				<h3>{{ t('assistant', 'Remembered conversations') }}</h3>
-				<p>{{ t('assistant', 'The following conversations are remembered by the Assistant Chat and will be taken into account for every new conversation:') }}</p>
+				<p>
+					{{ t('assistant', 'The following conversations are remembered by the Assistant Chat and will be taken into account for every new conversation:') }}
+				</p>
 				<NcFormBox>
 					<NcFormBoxButton v-for="conversation in rememberedConversations"
 						:key="conversation.id"
@@ -77,7 +81,9 @@
 			<!-- MCP Tool Selection -->
 			<div v-if="mcpToolsAvailable" class="mcp-tools-section">
 				<h3>{{ t('assistant', 'MCP Tools') }}</h3>
-				<p>{{ t('assistant', 'Select which MCP tools you want to use with the Assistant:') }}</p>
+				<p>
+					{{ t('assistant', 'Select which MCP tools you want to use with the Assistant:') }}
+				</p>
 				<MCPToolSelector v-model="selectedMCPTools"
 					:auto-expand="false"
 					@change="onMCPToolsChange" />
@@ -149,7 +155,7 @@ export default {
 		async loadMCPToolsAvailability() {
 			try {
 				const response = await axios.get(generateUrl('/apps/assistant/mcp/providers'), {
-					params: { enabled_only: true }
+					params: { enabled_only: true },
 				})
 				this.mcpToolsAvailable = response.data.length > 0
 			} catch (error) {
@@ -169,7 +175,7 @@ export default {
 		async onMCPToolsChange(tools) {
 			try {
 				await axios.put(generateUrl('/apps/assistant/user/mcp-tools'), {
-					tool_ids: this.selectedMCPTools
+					tool_ids: this.selectedMCPTools,
 				})
 				showSuccess(t('assistant', 'MCP tools selection saved'))
 			} catch (error) {

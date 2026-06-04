@@ -154,12 +154,12 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcSelect from '@nextcloud/vue/dist/Components/NcSelect.js'
-import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcDialog from '@nextcloud/vue/dist/Components/NcDialog.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcSelect from '@nextcloud/vue/components/NcSelect'
+import NcTextField from '@nextcloud/vue/components/NcTextField'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcDialog from '@nextcloud/vue/components/NcDialog'
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
 import DeleteIcon from 'vue-material-design-icons/Delete.vue'
@@ -235,7 +235,7 @@ export default {
 			try {
 				const response = await axios.get(
 					generateUrl('/apps/assistant/custom-headers'),
-					{ params: { provider: this.selectedProvider.value } }
+					{ params: { provider: this.selectedProvider.value } },
 				)
 				this.headers = response.data
 			} catch (error) {
@@ -257,7 +257,7 @@ export default {
 		async deleteHeader(header) {
 			try {
 				await axios.delete(
-					generateUrl('/apps/assistant/custom-headers/{id}', { id: header.id })
+					generateUrl('/apps/assistant/custom-headers/{id}', { id: header.id }),
 				)
 				this.loadHeaders()
 				showSuccess(t('assistant', 'Header deleted successfully'))
@@ -283,7 +283,7 @@ export default {
 							name: this.newHeader.name,
 							value: this.newHeader.value,
 							encrypted: this.newHeader.encrypted,
-						}
+						},
 					)
 					showSuccess(t('assistant', 'Header updated successfully'))
 				} else {
@@ -295,7 +295,7 @@ export default {
 							name: this.newHeader.name,
 							value: this.newHeader.value,
 							encrypted: this.newHeader.encrypted,
-						}
+						},
 					)
 					showSuccess(t('assistant', 'Header added successfully'))
 				}
@@ -326,7 +326,7 @@ export default {
 			try {
 				const response = await axios.post(
 					generateUrl('/apps/assistant/custom-headers/test'),
-					{ provider: this.selectedProvider.value }
+					{ provider: this.selectedProvider.value },
 				)
 
 				if (response.data.success) {

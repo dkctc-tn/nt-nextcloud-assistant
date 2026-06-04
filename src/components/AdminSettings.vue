@@ -124,17 +124,13 @@
 				<h3>
 					{{ t('assistant', 'NormieTranslator Customizations') }}
 				</h3>
-				
 				<!-- Branding Settings -->
 				<BrandingSettings />
-				
 				<!-- Custom Headers Settings -->
 				<CustomHeadersSettings />
-				
 				<!-- MCP Provider Settings -->
 				<MCPProviderSettings />
 			</div>
-
 			<div class="chat-with-ai">
 				<h4>
 					{{ t('assistant', 'Chat with AI') }}

@@ -54,10 +54,12 @@
 							<div class="tool-header">
 								<NcCheckboxRadioSwitch :checked="isToolSelected(tool.id)"
 									@update:checked="toggleTool(tool)" />
-								<ToolIcon :size="20" class="tool-icon" />
+								<ToolboxIcon :size="20" class="tool-icon" />
 								<span class="tool-name">{{ tool.name }}</span>
 							</div>
-							<p class="tool-description">{{ tool.description }}</p>
+							<p class="tool-description">
+								{{ tool.description }}
+							</p>
 							<div v-if="tool.parameters && tool.parameters.length > 0" class="tool-params">
 								<span class="params-label">{{ t('assistant', 'Parameters:') }}</span>
 								<span class="params-list">{{ formatParameters(tool.parameters) }}</span>
@@ -90,14 +92,14 @@
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import NcCheckboxRadioSwitch from '@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js'
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js'
-import NcChip from '@nextcloud/vue/dist/Components/NcChip.js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
+import NcChip from '@nextcloud/vue/components/NcChip'
 
 import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue'
 import ChevronUpIcon from 'vue-material-design-icons/ChevronUp.vue'
-import ToolIcon from 'vue-material-design-icons/Tool.vue'
+import ToolboxIcon from 'vue-material-design-icons/Toolbox.vue'
 
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
@@ -113,7 +115,7 @@ export default {
 		NcChip,
 		ChevronDownIcon,
 		ChevronUpIcon,
-		ToolIcon,
+		ToolboxIcon,
 	},
 
 	props: {
@@ -166,7 +168,7 @@ export default {
 			try {
 				const response = await axios.get(
 					generateUrl('/apps/assistant/mcp/providers'),
-					{ params: { enabled_only: true } }
+					{ params: { enabled_only: true } },
 				)
 				this.enabledProviders = response.data
 
@@ -189,7 +191,7 @@ export default {
 			try {
 				const response = await axios.post(
 					generateUrl('/apps/assistant/mcp/tools/batch'),
-					{ tool_ids: toolIds }
+					{ tool_ids: toolIds },
 				)
 				this.selectedTools = response.data
 			} catch (error) {

@@ -19,7 +19,9 @@
 		<template v-if="onlyHasAudioInput" #name>
 			<div class="item-audio-io">
 				<MicrophoneMessageIcon class="item-mic-icon" />
-				<span>{{ t('assistant', 'Audio input') }}</span>
+				<span>
+					{{ t('assistant', 'Audio input') }}
+				</span>
 			</div>
 		</template>
 		<template #subname>
@@ -35,7 +37,9 @@
 			</div>
 			<div v-else-if="isSuccessful && onlyHasAudioOutput" class="item-audio-io">
 				<MicrophoneMessageIcon />
-				<span>{{ t('assistant', 'Audio output') }}</span>
+				<span>
+					{{ t('assistant', 'Audio output') }}
+				</span>
 			</div>
 			<span v-else>
 				{{ subName }}

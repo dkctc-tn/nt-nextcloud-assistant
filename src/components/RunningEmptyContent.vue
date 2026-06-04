@@ -10,7 +10,9 @@
 			<div class="running-actions">
 				<div v-if="progress !== null"
 					class="progress">
-					<span>{{ formattedProgress }} %</span>
+					<span>
+						{{ formattedProgress }} %
+					</span>
 					<NcProgressBar
 						:value="progress" />
 				</div>
