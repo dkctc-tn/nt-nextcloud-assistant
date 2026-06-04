@@ -14,6 +14,8 @@ This document describes how to deploy `nt-nextcloud-assistant` to Railway using 
 - On startup, a custom entrypoint:
 	- starts Nextcloud
 	- waits for initialization
+	- checks Railway and custom domain environment variables on every start
+	- adds missing trusted domains without duplicating existing entries
 	- enables `nt_assistant`
 	- runs `maintenance:update:all`
 
@@ -40,7 +42,13 @@ This document describes how to deploy `nt-nextcloud-assistant` to Railway using 
 
 - `NEXTCLOUD_ADMIN_USER`
 - `NEXTCLOUD_ADMIN_PASSWORD`
-- `NEXTCLOUD_TRUSTED_DOMAINS`
+- `NEXTCLOUD_TRUSTED_DOMAINS` (keep `localhost` here for bootstrap, then use the variables below for later updates)
+
+### Railway and custom domain sync
+
+- `RAILWAY_PUBLIC_DOMAIN`
+- `RAILWAY_STATIC_URL`
+- `CUSTOM_DOMAIN`
 
 ### PHP tuning
 
@@ -69,6 +77,25 @@ After deployment:
 	- `php /var/www/html/occ app:list | grep nt_assistant`
 4. Confirm the app is enabled in Nextcloud admin app management.
 
+## Trusted domain management
+
+After Railway assigns a public domain, add it as an environment variable and restart or redeploy the service:
+
+```bash
+RAILWAY_PUBLIC_DOMAIN=your-app.up.railway.app
+```
+
+If Railway also provides a static URL, or if you want to keep an extra custom domain trusted on every restart, set:
+
+```bash
+RAILWAY_STATIC_URL=your-app.up.railway.app
+CUSTOM_DOMAIN=yourdomain.com
+```
+
+The custom entrypoint checks these variables on every container start and appends any missing domain to Nextcloud's `trusted_domains` list. This keeps redeployments safe if Railway changes the generated domain.
+
+As a fallback, admins can also manage trusted domains from the Nextcloud admin interface in the `System Configuration` page exposed by `nt_assistant`.
+
 ## Troubleshooting
 
 ### App not enabled automatically
@@ -85,7 +112,9 @@ After deployment:
 
 ### Trusted domain or redirect issues
 
-- Ensure `NEXTCLOUD_TRUSTED_DOMAINS` includes your Railway domain.
+- Ensure `RAILWAY_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`, or `CUSTOM_DOMAIN` contains the public host you expect.
+- Restart or redeploy the service after changing those variables so the entrypoint can sync the values.
+- If you can reach the admin area through another trusted host, open the `System Configuration` page from `nt_assistant` and add the missing host there.
 
 ### Missing assets
 
@@ -95,4 +124,4 @@ After deployment:
 
 1. Push new commits to the connected branch.
 2. Railway rebuilds the Docker image automatically.
-3. During startup, the entrypoint runs app enable/update commands again (safe if already enabled).
+3. During startup, the entrypoint runs trusted-domain sync plus app enable/update commands again (safe if already enabled).
