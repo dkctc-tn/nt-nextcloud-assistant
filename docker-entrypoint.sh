@@ -10,6 +10,26 @@ NEXTCLOUD_PID=$!
 echo "⏳ Waiting for Nextcloud initialization..."
 sleep 30
 
+is_nextcloud_installed() {
+	# When Nextcloud is not installed, occ prints a warning and may exit non-zero.
+	# We treat any failure or missing JSON as "not installed".
+	local status_json
+	status_json="$(php /var/www/html/occ status --output=json 2>/dev/null || true)"
+	if [ -z "$status_json" ]; then
+		return 1
+	fi
+	php -r '$j=json_decode(stream_get_contents(STDIN), true); exit((isset($j["installed"]) && $j["installed"]===true) ? 0 : 1);' \
+		<<<"$status_json" \
+		>/dev/null 2>&1 \
+		&& return 0 \
+		|| return 1
+}
+
+run_occ() {
+	# Never let an occ failure crash the container.
+	php /var/www/html/occ "$@" 2>/dev/null || true
+}
+
 add_domain_if_missing() {
 	local domain="$1"
 	if [ -z "$domain" ]; then
@@ -17,7 +37,7 @@ add_domain_if_missing() {
 	fi
 
 	local current_domains
-	current_domains="$(php /var/www/html/occ config:system:get trusted_domains 2>/dev/null || true)"
+	current_domains="$(run_occ config:system:get trusted_domains)"
 
 	if printf '%s\n' "$current_domains" | grep -Fxq "$domain"; then
 		echo "✓ $domain already in trusted_domains"
@@ -26,44 +46,55 @@ add_domain_if_missing() {
 
 	echo "🌐 Adding $domain to trusted_domains..."
 	local index=0
-	while php /var/www/html/occ config:system:get trusted_domains "$index" >/dev/null 2>&1; do
+	while run_occ config:system:get trusted_domains "$index" >/dev/null 2>&1; do
 		index=$((index + 1))
 	done
-	php /var/www/html/occ config:system:set trusted_domains "$index" --value="$domain"
+	run_occ config:system:set trusted_domains "$index" --value="$domain"
 	echo "✅ Added $domain at index $index"
 }
 
-if php /var/www/html/occ status >/dev/null 2>&1; then
-	if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
-		echo "🚂 Railway public domain detected: $RAILWAY_PUBLIC_DOMAIN"
-		add_domain_if_missing "$RAILWAY_PUBLIC_DOMAIN"
-	fi
+post_install_tasks() {
+	# During first-time setup, Nextcloud isn't installed yet and occ can't modify config.
+	# Wait until installation completes, then apply trusted-domain sync + app enable once.
+	set +e
+	local max_attempts=120
+	local attempt=0
+	while [ "$attempt" -lt "$max_attempts" ]; do
+		if is_nextcloud_installed; then
+			echo "✅ Nextcloud is installed; running post-install tasks..."
+			if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
+				echo "🚂 Railway public domain detected: $RAILWAY_PUBLIC_DOMAIN"
+				add_domain_if_missing "$RAILWAY_PUBLIC_DOMAIN"
+			fi
+			if [ -n "$RAILWAY_STATIC_URL" ]; then
+				echo "🚂 Railway static URL detected: $RAILWAY_STATIC_URL"
+				add_domain_if_missing "$RAILWAY_STATIC_URL"
+			fi
+			if [ -n "$CUSTOM_DOMAIN" ]; then
+				echo "🌐 Custom domain detected: $CUSTOM_DOMAIN"
+				add_domain_if_missing "$CUSTOM_DOMAIN"
+			fi
 
-	if [ -n "$RAILWAY_STATIC_URL" ]; then
-		echo "🚂 Railway static URL detected: $RAILWAY_STATIC_URL"
-		add_domain_if_missing "$RAILWAY_STATIC_URL"
-	fi
+			local app_info_path="/var/www/html/custom_apps/nt_assistant/appinfo/info.xml"
+			if [ -f "$app_info_path" ]; then
+				echo "🎨 Found nt_assistant app, enabling it..."
+				run_occ app:enable nt_assistant
+				echo "✅ App enable command finished."
+				echo "⏳ Running maintenance update..."
+				run_occ maintenance:update:all
+				echo "✅ Maintenance update command finished."
+			else
+				echo "⚠️ nt_assistant app not found at $app_info_path; skipping enable step."
+			fi
+			return 0
+		fi
+		attempt=$((attempt + 1))
+		sleep 5
+	done
+	echo "⚠️ Timed out waiting for Nextcloud to become installed; skipping post-install tasks for now."
+}
 
-	if [ -n "$CUSTOM_DOMAIN" ]; then
-		echo "🌐 Custom domain detected: $CUSTOM_DOMAIN"
-		add_domain_if_missing "$CUSTOM_DOMAIN"
-	fi
-else
-	echo "⚠️ Nextcloud is not ready for trusted domain updates yet; skipping automatic domain sync on this start."
-fi
-
-APP_INFO_PATH="/var/www/html/custom_apps/nt_assistant/appinfo/info.xml"
-if [ -f "$APP_INFO_PATH" ]; then
-	echo "🎨 Found nt_assistant app, enabling it..."
-	php /var/www/html/occ app:enable nt_assistant || echo "⚠️ nt_assistant may already be enabled or not ready yet."
-	echo "✅ App enable command finished."
-
-	echo "⏳ Running maintenance update..."
-	php /var/www/html/occ maintenance:update:all || echo "⚠️ maintenance:update:all failed or is not required right now."
-	echo "✅ Maintenance update command finished."
-else
-	echo "⚠️ nt_assistant app not found at $APP_INFO_PATH; skipping enable step."
-fi
+post_install_tasks &
 
 # Keep the container attached to the Nextcloud process lifecycle.
 echo "⏳ Handing control back to Nextcloud process..."

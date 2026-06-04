@@ -110,6 +110,25 @@ As a fallback, admins can also manage trusted domains from the Nextcloud admin i
 - Re-check all `POSTGRES_*` values.
 - Ensure Railway service networking links are active.
 
+### PostgreSQL permission denied for schema public
+
+If the installer fails with an error like:
+
+`SQLSTATE[42501]: Insufficient privilege: 7 ERROR: permission denied for schema public`
+
+This means the configured database user can connect but cannot create tables in the `public` schema.
+
+Fix options:
+
+- Preferred: create/use a database owned by your configured `POSTGRES_USER`.
+- Or run a one-time SQL fix as the database owner/admin:
+
+```sql
+ALTER SCHEMA public OWNER TO <POSTGRES_USER>;
+GRANT USAGE, CREATE ON SCHEMA public TO <POSTGRES_USER>;
+GRANT ALL PRIVILEGES ON DATABASE <POSTGRES_DB> TO <POSTGRES_USER>;
+```
+
 ### Trusted domain or redirect issues
 
 - Ensure `RAILWAY_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`, or `CUSTOM_DOMAIN` contains the public host you expect.

@@ -14,3 +14,6 @@ node_modules
 /vendor/
 /tests/.phpunit*cache
 .github/copilot_instructions.md
+
+#env
+.env
