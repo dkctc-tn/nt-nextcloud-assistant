@@ -33,7 +33,7 @@
 					rows="3"
 					@update:value="updateBranding" />
 				<p class="hint">
-					{{ t('assistant', 'Custom greeting or header message for users') }}
+					{{ t('assistant', 'Cuustom greeting or header message for users') }}
 				</p>
 			</div>
 

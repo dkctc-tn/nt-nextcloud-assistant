@@ -1,17 +1,76 @@
-# Railway Docker Deployment Guide
+# Railway / Cloud Host Docker Deployment Guide
 
-This document describes how to deploy `nt-nextcloud-assistant` to Railway using Docker, and it also applies to other Docker-capable platforms.
+This document describes how to deploy `nt-nextcloud-assistant` to Railway using Docker, and it also applies to other Docker-capable cloud hosting platforms.
 
 ## DK QUICK NOTES:
 
-#--build and push image to ghcr for Railway deployment:
-#---make sure docker is running first
-#---do the login thing once
-#echo "<your_personal_access_token>" | docker login ghcr.io -u "<your_github_username>" --password-stdin 
-#---then build and push the image as needed, changing the tag between test and prod etc:
-
 docker build -t ghcr.io/dkctc-tn/nt-nextcloud-assistant:test . 
 docker push ghcr.io/dkctc-tn/nt-nextcloud-assistant:test  
+
+### Local Development with Docker
+
+The three development configuration files:
+
+1. **docker-compose.dev.yml** - Orchestrates PostgreSQL, Nextcloud, and Frontend watcher
+2. **Dockerfile.dev** - Multi-stage build with Node.js for frontend asset compilation
+3. **.env.example** - Template for environment variables
+
+## How to Use
+
+### First Time Setup:
+
+```powershell
+# 1. Create your local .env file (if needed)
+cp .env.example .env
+
+# 2. Start everything with docker-compose
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+**Note**: You don't need to run `npm install` on your host machine. The Docker build handles all Node.js dependencies automatically.
+
+### Daily Development:
+
+```powershell
+# Start all services (database, nextcloud, and frontend watcher)
+docker-compose -f docker-compose.dev.yml up
+
+# Stop with Ctrl+C, or in another terminal:
+docker-compose -f docker-compose.dev.yml down
+
+# Rebuild after major changes (package.json, composer.json):
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+## How It Works
+
+- **PostgreSQL**: Local database container on port 5432
+- **Nextcloud**: Your app served at http://localhost:8080 with pre-built frontend assets
+- **Frontend Watcher**: Separate Node container runs `npm run watch` for hot-reload
+- **Volume Mounts**: 
+  - Source code is mounted read-write to allow watcher to update compiled assets
+  - Nextcloud volume persists data between restarts
+  - Changes to `.vue`, `.js`, `.scss` files trigger automatic rebuilds
+
+### Development Workflow
+
+1. **Backend changes** (PHP files): Edit and refresh browser - changes take effect immediately
+2. **Frontend changes** (Vue/JS/SCSS): Edit → watcher auto-rebuilds → refresh browser
+3. **Config changes** (package.json, composer.json): Run `docker-compose up --build` to rebuild
+
+### App Architecture
+
+The app uses the ID `nt_assistant` (separate from official Nextcloud Assistant). This allows:
+- Independent development and customization
+- Coexistence with official assistant app if needed
+- Integration with `integration_openai` and other provider apps
+
+When you edit frontend files, the watcher rebuilds them into the `js/` folder, which is immediately visible to Nextcloud. Just refresh your browser to see changes! 🎉
+
+
+
+
+
 
 
 ## Deployment Architecture
@@ -31,15 +90,41 @@ docker push ghcr.io/dkctc-tn/nt-nextcloud-assistant:test
 	- enables `nt_assistant`
 	- runs `maintenance:update:all`
 
-## Railway Deployment Steps
+## Docker image build for Railway or other cloud hosts
 
-1. Push this repository branch with `Dockerfile`, `.dockerignore`, and `docker-entrypoint.sh`.
-2. In Railway, create a new service from this GitHub repository.
-3. Ensure Railway is using the repository root `Dockerfile`.
-4. Add a PostgreSQL service in Railway and connect it to this service.
-5. Add required environment variables (see below).
-6. Add a persistent volume mounted at `/var/www/html`.
-7. Deploy the service.
+Build and push a Docker image to a registry for cloud host deployment
+
+- Make sure Docker is running first
+- For GitHub Container Registry (ghcr.io), authenticate with your personal access token:
+
+```bash
+echo "<your_personal_access_token>" | docker login ghcr.io -u "<your_github_username>" --password-stdin 
+```
+
+- For Docker Hub, authenticate with your username and password:
+
+```bash
+docker login -u "<your_dockerhub_username>" -p "<your_dockerhub_password>"
+```
+
+- For other registries, follow their specific authentication process.
+
+- Then `build` and `push` the image as needed, updating the tag for between `test`/`prod`/versions etc
+
+```bash
+#ghcr
+docker build -t ghcr.io/<your_github_username>/<your_image_name>:<tag> .
+docker push ghcr.io/<your_github_username>/<your_image_name>:<tag>
+
+#docker hub
+docker build -t <your_dockerhub_username>/<your_image_name>:<tag> .
+docker push <your_dockerhub_username>/<your_image_name>:<tag>
+
+#or whatever registry you are using, change the format as needed
+```
+
+- Then set the environment variables (see below), pull the image, and deploy it to the cloud hosting platform
+
 
 ## Required Environment Variables
 
@@ -156,3 +241,19 @@ GRANT ALL PRIVILEGES ON DATABASE <POSTGRES_DB> TO <POSTGRES_USER>;
 1. Push new commits to the connected branch.
 2. Railway rebuilds the Docker image automatically.
 3. During startup, the entrypoint runs trusted-domain sync plus app enable/update commands again (safe if already enabled).
+
+
+## OLD Railway Deployment Steps using the repository
+
+There is hardly a reason to do this if one can deploy `docker` images, so do that first. This process is annoying and the entire image needs to rebuild every time on the cloud host, and that takes way longer than building it locally and pushing it to an image repo and redeploying. But just in case you cannot:
+
+1. Push this repository branch with `Dockerfile`, `.dockerignore`, and `docker-entrypoint.sh`.
+2. In Railway, create a new service from this GitHub repository.
+3. Ensure Railway is using the repository root `Dockerfile`.
+4. Add a PostgreSQL service in Railway and connect it to this service.
+5. Add required environment variables (see below).
+6. Add a persistent volume mounted at `/var/www/html`.
+7. Deploy the service.
+8. Try to use `docker` images again and stop doing it this way
+
+- Then when you push updates to the branch, Railway will rebuild the image and redeploy automatically if you have auto-deploy enabled. Other providers might not update automatically on new commits, so you may need to trigger redeploys manually after pushing updates.

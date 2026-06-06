@@ -52,7 +52,8 @@ use OCP\TaskProcessing\IManager;
 
 class Application extends App implements IBootstrap {
 
-	public const APP_ID = 'nt_assistant';
+	public const APP_ID = 'assistant';
+	//public const APP_ID = 'nt_assistant';
 
 	public const ASSISTANT_DATA_FOLDER_NAME = 'Assistant';
 
@@ -118,7 +119,6 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(TaskFailedEvent::class, NewFileMenuTaskFailedListener::class);
 
 		$context->registerNotifierService(Notifier::class);
-		$context->registerAdminSettings(AdminSystem::class);
 
 		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
 

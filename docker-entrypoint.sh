@@ -50,18 +50,49 @@ configure_reverse_proxy() {
 	if [ -f /var/www/html/config/config.php ]; then
 		echo "🔧 Configuring reverse proxy settings..."
 		
-		# Set overwriteprotocol to https (Railway terminates TLS)
-		run_occ config:system:set overwriteprotocol --value="https"
-		
 		# Set overwrite.cli.url for Railway domain
 		if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
+            # Set overwriteprotocol to https (Railway terminates TLS)
+		    run_occ config:system:set overwriteprotocol --value="https"
 			run_occ config:system:set overwrite.cli.url --value="https://$RAILWAY_PUBLIC_DOMAIN"
-		fi
+            # Trust Railway's proxy network (Railway uses 100.64.0.0/10 for internal networking)
+		    run_occ config:system:set trusted_proxies 0 --value="100.64.0.0/10"
+        fi
+        #if this is localhost
+        if [ -n "$LOCALHOST_DOMAIN" ]; then
+            # Set overwriteprotocol to https (Railway terminates TLS)
+		    run_occ config:system:set overwriteprotocol --value="http"
+			run_occ config:system:set overwrite.cli.url --value="http://$LOCALHOST_DOMAIN"
+            # Trust Railway's proxy network (Railway uses 100.64.0.0/10 for internal networking)
+		    #run_occ config:system:set trusted_proxies 0 --value="100.64.0.0/10"
+        fi
 		
-		# Trust Railway's proxy network (Railway uses 100.64.0.0/10 for internal networking)
-		run_occ config:system:set trusted_proxies 0 --value="100.64.0.0/10"
+		
 		
 		echo "✅ Reverse proxy configuration complete"
+	fi
+}
+
+configure_apps_paths() {
+	# Configure Docker-compatible apps_paths to separate shipped apps from user-installed apps.
+	# This prevents "Cannot write into 'apps' directory" errors.
+	if [ -f /var/www/html/config/config.php ]; then
+		echo "🔧 Configuring apps_paths for Docker..."
+		
+		# Ensure custom_apps directory exists with proper permissions
+		mkdir -p /var/www/html/custom_apps
+		chown www-data:www-data /var/www/html/custom_apps
+		chmod 755 /var/www/html/custom_apps
+		
+		# Configure apps_paths: /apps (shipped, read-only) and /custom_apps (user-installed, writable)
+		run_occ config:system:set apps_paths 0 path --value="/var/www/html/apps"
+		run_occ config:system:set apps_paths 0 url --value="/apps"
+		run_occ config:system:set apps_paths 0 writable --value="false"
+		run_occ config:system:set apps_paths 1 path --value="/var/www/html/custom_apps"
+		run_occ config:system:set apps_paths 1 url --value="/custom_apps"
+		run_occ config:system:set apps_paths 1 writable --value="true"
+		
+		echo "✅ apps_paths configured (user apps → /custom_apps)"
 	fi
 }
 
@@ -78,6 +109,9 @@ post_install_tasks() {
 			# Configure reverse proxy settings FIRST
 			configure_reverse_proxy
 			
+			# Configure apps_paths for Docker (prevents "Cannot write into 'apps' directory")
+			configure_apps_paths
+			
 			if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
 				echo "🚂 Railway public domain detected: $RAILWAY_PUBLIC_DOMAIN"
 				add_domain_if_missing "$RAILWAY_PUBLIC_DOMAIN"
@@ -90,17 +124,24 @@ post_install_tasks() {
 				echo "🌐 Custom domain detected: $CUSTOM_DOMAIN"
 				add_domain_if_missing "$CUSTOM_DOMAIN"
 			fi
+            if [ -n "$LOCALHOST_DOMAIN" ]; then
+				echo "🌐 Localhost domain detected: $LOCALHOST_DOMAIN"
+				add_domain_if_missing "$LOCALHOST_DOMAIN"
+			fi
 
-			local app_info_path="/var/www/html/custom_apps/nt_assistant/appinfo/info.xml"
+			#local app_info_path="/var/www/html/custom_apps/nt_assistant/appinfo/info.xml"
+            local app_info_path="/var/www/html/apps/assistant/appinfo/info.xml"
 			if [ -f "$app_info_path" ]; then
-				echo "🎨 Found nt_assistant app, enabling it..."
-				run_occ app:enable nt_assistant
+				echo "🎨 Found nt_assistant (as \`assistant\`) app, enabling it..."
+				#run_occ app:enable nt_assistant
+                run_occ app:enable assistant
 				echo "✅ App enable command finished."
 				echo "⏳ Running maintenance update..."
 				run_occ maintenance:update:all
 				echo "✅ Maintenance update command finished."
 			else
-				echo "⚠️ nt_assistant app not found at $app_info_path; skipping enable step."
+				echo "\n\n⚠️ nt_assistant (as \`assistant\`) app not found at $app_info_path; skipping enable step.\n\n"
+                sleep 5
 			fi
 			return 0
 		fi
@@ -114,6 +155,9 @@ post_install_tasks &
 
 # Execute the official Nextcloud entrypoint in the foreground to preserve stdin/stdout and signal handling.
 # If no arguments are provided (Railway sometimes starts containers this way), default to apache2-foreground.
+#wait 10 seconds
+sleep 10
+
 echo "⏳ Handing control back to Nextcloud official entrypoint..."
 if [ $# -eq 0 ]; then
 	echo "⚠️ No CMD arguments detected, defaulting to apache2-foreground"

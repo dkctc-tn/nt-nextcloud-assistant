@@ -1,0 +1,75 @@
+# syntax=docker/dockerfile:1
+# Development Dockerfile - includes frontend build for complete dev environment
+
+ARG NEXTCLOUD_IMAGE=nextcloud:33-apache
+
+# Base PHP/Nextcloud stage
+FROM ${NEXTCLOUD_IMAGE} AS nc_base
+
+# Install PHP extensions
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		ca-certificates \
+		git \
+		unzip \
+		zip \
+		libfreetype6-dev \
+		libjpeg62-turbo-dev \
+		libpng-dev; \
+	docker-php-ext-configure gd --with-freetype --with-jpeg; \
+	docker-php-ext-install -j"$(nproc)" gd; \
+	apt-get purge -y --auto-remove \
+		libfreetype6-dev \
+		libjpeg62-turbo-dev \
+		libpng-dev; \
+	rm -rf /var/lib/apt/lists/*
+
+ARG NT_NEXTCLOUD_IMAGE=nt-nc-assistant-v1:dev
+
+# Base PHP/Nextcloud stage
+FROM ${NT_NEXTCLOUD_IMAGE} AS nt_nc_base
+
+# Node build stage - compile frontend assets
+# FROM node:24-bookworm-slim AS node_builder
+WORKDIR /build/nt_assistant
+#copy the entire app context to ensure all files are available for the build (e.g. translations)
+#--pick up here with making sure we are copying everything correctly from the image
+COPY nt_assistant/ ./
+# COPY package.json package-lock.json ./
+# RUN npm ci --prefer-offline --no-audit
+# COPY . .
+# RUN npm run build
+
+# Final development stage
+FROM nc_base
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# Create app directory
+WORKDIR /var/www/html/custom_apps/nt_assistant
+#WORKDIR /var/www/html/apps/assistant
+
+# Install PHP dependencies
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy app files
+COPY . .
+
+# Copy built frontend assets from Node stage
+COPY --from=node_builder /build/nt_assistant/js ./js
+
+# Set ownership for app files
+RUN chown -R www-data:www-data /var/www/html/custom_apps/nt_assistant
+#RUN chown -R www-data:www-data /var/www/html/apps/assistant
+
+# Install custom entrypoint
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["apache2-foreground"]

@@ -1,0 +1,58 @@
+#version: '3.8'
+
+services:
+  # PostgreSQL database for local development
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Nextcloud with the app (without frontend build, using volume mount)
+  nextcloud:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:80"
+    environment:
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
+      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nextcloud}
+      # Admin
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD:-admin}
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS:-localhost}
+      # Development
+      #RAILWAY_PUBLIC_DOMAIN: ${RAILWAY_PUBLIC_DOMAIN:-localhost:8080}
+      LOCALHOST_DOMAIN: ${LOCALHOST_DOMAIN:-localhost:8080}
+      #OVERWRITEPROTOCOL: "http"
+    volumes:
+      - nextcloud_html:/var/www/html
+      # Mount app source as read-write for watcher access
+      - ./:/var/www/html/custom_apps/nt_assistant
+    depends_on:
+      - postgres
+
+  # Frontend watcher - builds assets on change
+  # frontend-watcher:
+  #   image: node:24-bookworm-slim
+  #   working_dir: /app
+  #   volumes:
+  #     - ./:/app
+  #   command: npm run watch
+  #   environment:
+  #     NODE_ENV: development
+  #   depends_on:
+  #     - nextcloud
+
+volumes:
+  postgres_data:
+  nextcloud_html:

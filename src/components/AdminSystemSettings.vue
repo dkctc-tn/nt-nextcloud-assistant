@@ -85,6 +85,8 @@ import NcTextField from '@nextcloud/vue/components/NcTextField'
 import DeleteIcon from 'vue-material-design-icons/Delete.vue'
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
 
+const ntAppName = 'assistant'
+
 export default {
 	name: 'AdminSystemSettings',
 
@@ -136,7 +138,7 @@ export default {
 			this.loading = true
 			this.clearMessages()
 			try {
-				const response = await axios.get(generateUrl('/apps/nt_assistant/api/config/trusted-domains'))
+				const response = await axios.get(generateUrl(`/apps/${ntAppName}/api/config/trusted-domains`))
 				this.applyResponse(response.data)
 			} catch (error) {
 				this.errorMessage = this.getErrorMessage(error, this.t('assistant', 'Failed to load trusted domains'))
@@ -154,7 +156,7 @@ export default {
 			this.loading = true
 			this.clearMessages()
 			try {
-				const response = await axios.post(generateUrl('/apps/nt_assistant/api/config/trusted-domains'), {
+				const response = await axios.post(generateUrl(`/apps/${ntAppName}/api/config/trusted-domains`), {
 					domain: normalizedDomain,
 				})
 				this.applyResponse(response.data)
@@ -172,7 +174,7 @@ export default {
 			this.loading = true
 			this.clearMessages()
 			try {
-				const response = await axios.delete(generateUrl('/apps/nt_assistant/api/config/trusted-domains/{index}', {
+				const response = await axios.delete(generateUrl(`/apps/${ntAppName}/api/config/trusted-domains/{index}`, {
 					index,
 				}))
 				this.applyResponse(response.data)
@@ -189,7 +191,7 @@ export default {
 			this.loading = true
 			this.clearMessages()
 			try {
-				const response = await axios.post(generateUrl('/apps/nt_assistant/api/config/trusted-domains/auto-add-current'))
+				const response = await axios.post(generateUrl(`/apps/${ntAppName}/api/config/trusted-domains/auto-add-current`))
 				this.applyResponse(response.data)
 				this.successMessage = this.t('assistant', 'Current request host added')
 				showSuccess(this.successMessage)
